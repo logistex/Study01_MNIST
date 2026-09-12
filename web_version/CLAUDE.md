@@ -6,18 +6,18 @@
 
 ## 실행
 
-```bash
-cd web_version
-python3 -m http.server 8000
-open http://localhost:8000/
-```
-
-**윈도우에서는 `python3` 대신 `py` 를 쓴다.** 맥의 `python3` 를 윈도우에서 그대로 치면 대개 마이크로소프트 스토어가 열린다. 브라우저를 여는 명령도 다르다.
-
 ```powershell
 cd web_version
 py -m http.server 8000
 start http://localhost:8000/
+```
+
+**맥에서는 `py` 대신 `python3`, `start` 대신 `open` 을 쓴다.** 윈도우에서 `python3` 를 치면 대개 마이크로소프트 스토어가 열린다.
+
+```bash
+cd web_version
+python3 -m http.server 8000
+open http://localhost:8000/
 ```
 
 **이 폴더는 파이썬을 쓰지 않는다.** 위 명령은 정적 파일을 내려 줄 HTTP 서버가 필요해서 파이썬에 딸려 오는 것을 쓸 뿐이다. 다른 서버를 써도 된다.
@@ -78,18 +78,18 @@ curl -s https://logistex.github.io/Study01_MNIST_mac/CLAUDE.md | diff - CLAUDE.m
 
 ## 검증
 
-```bash
-cd ../desktop_version && python3 검증데이터만들기.py   # 정답 데이터 생성
-cd ../web_version && python3 -m http.server 8000
-open http://localhost:8000/검증.html
-```
-
-윈도우라면 `python3` 대신 `py`, `open` 대신 `start` 를 쓴다.
-
 ```powershell
-cd ..\desktop_version; py 검증데이터만들기.py
+cd ..\desktop_version; py 검증데이터만들기.py   # 정답 데이터 생성
 cd ..\web_version; py -m http.server 8000
 start http://localhost:8000/검증.html
+```
+
+맥이라면 `py` 대신 `python3`, `start` 대신 `open`, `;` 대신 `&&` 를 쓴다.
+
+```bash
+cd ../desktop_version && python3 검증데이터만들기.py
+cd ../web_version && python3 -m http.server 8000
+open http://localhost:8000/검증.html
 ```
 
 `검증데이터만들기.py` 는 `torch` 와 `torchvision` 이 있어야 돈다.
@@ -125,13 +125,13 @@ start http://localhost:8000/검증.html
 | `preprocess.py`의 3단계 | `전처리.js`의 `mnist형식으로변환` | 인식률이 크게 떨어진다 |
 | `app.py`의 `붓굵기 = 18` | `앱.js`의 `붓굵기` | 획 굵기가 학습 데이터와 달라진다 |
 
-**가중치를 다시 학습했다면** `cd ../desktop_version && python3 가중치내보내기.py`를 반드시 다시 돌린다. 그러지 않으면 웹 버전은 옛 가중치를 계속 쓴다.
+**가중치를 다시 학습했다면** `cd ..\desktop_version; py 가중치내보내기.py`를 반드시 다시 돌린다. 그러지 않으면 웹 버전은 옛 가중치를 계속 쓴다.
 
 정규화 상수 `0.1307`, `0.3081`은 이 폴더 어디에도 적지 않는다. `가중치정보.json`을 통해 파이썬에서 받아 쓴다. 값의 출처는 언제나 파이썬이다.
 
 ## 왜 ONNX를 안 쓰나
 
-원래 계획은 모델을 ONNX로 변환해 ONNX Runtime Web으로 돌리는 것이었다. 그런데 `onnx` 패키지가 표준 CPython 3.14용 macOS 휠을 배포하지 않는다(free-threaded `cp314t`용만 있다). 이 맥의 파이썬은 GIL이 켜진 일반 빌드라 설치할 수 없다.
+원래 계획은 모델을 ONNX로 변환해 ONNX Runtime Web으로 돌리는 것이었다. 그런데 `onnx` 패키지가 표준 CPython 3.14용 macOS 휠을 배포하지 않는다(free-threaded `cp314t`용만 있다). 처음 만든 맥의 파이썬은 GIL이 켜진 일반 빌드라 설치할 수 없었다.
 
 모델이 작아서(파라미터 42만 개, 순전파 430만 곱셈덧셈) 직접 구현이 오히려 단순했다. 외부 라이브러리가 0개라 이 폴더를 통째로 정적 호스팅에 올릴 수 있다는 이점도 생겼다.
 
@@ -144,7 +144,7 @@ start http://localhost:8000/검증.html
 - `전처리.js`의 `파이썬반올림`은 파이썬 `round`와 같은 규칙(정확히 0.5면 짝수 쪽)을 따른다. `Math.round`로 바꾸면 드물게 무게중심이 한 화소 어긋난다.
 - 캔버스 밝기는 R 채널만 읽는다. 검은 배경에 흰 글씨만 그리므로 R, G, B가 항상 같기 때문이다. 색을 쓰게 되면 이 가정이 깨진다.
 - `전처리.js`의 `면적평균축소`는 루프 상한을 `Math.min(높이, Math.ceil(아래))`로 자른다. 이 `Math.min`을 빼면 부동소수 오차 때문에 배열 밖을 읽는다. 예를 들어 자른 너비 21을 새 너비 19로 줄일 때 `19 * (21/19)`는 `21.000000000000004`라 마지막 열에서 인덱스가 하나 넘친다. 그러면 `undefined`가 `NaN`으로 번져 **출력 784개가 전부 `NaN`**이 되고, argmax가 항상 0을 골라 **어떤 숫자를 그리든 "0"이라고 답한다.** 바운딩 박스 조합의 0.87%에서 일어난다. 실제로 개발 중에 이 결함이 있었고 검증 데이터(바운딩 박스가 10의 배수뿐)가 우연히 비껴갔다.
-- 이 폴더의 파일 이름이 전부 한글이다(`가중치.bin`, `스타일.css`, `앱.js` 등). 로컬 `python3 -m http.server`는 이 이름들을 문제없이 돌려주지만, 정적 호스팅에 따라 percent-encoding 처리가 달라 배포 후에야 깨지는 경우가 있을 수 있다. 배포하게 되면 로컬 확인으로 끝내지 말고, 배포된 주소를 실제로 열어 그림이 인식되는지 확인하는 것을 마지막 단계로 삼는다.
+- 이 폴더의 파일 이름이 전부 한글이다(`가중치.bin`, `스타일.css`, `앱.js` 등). 로컬 `py -m http.server`는 이 이름들을 문제없이 돌려주지만, 정적 호스팅에 따라 percent-encoding 처리가 달라 배포 후에야 깨지는 경우가 있을 수 있다. 배포하게 되면 로컬 확인으로 끝내지 말고, 배포된 주소를 실제로 열어 그림이 인식되는지 확인하는 것을 마지막 단계로 삼는다.
 
 ## 작성 규칙
 

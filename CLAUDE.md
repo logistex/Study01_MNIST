@@ -4,7 +4,7 @@ MNIST 손글씨 숫자 인식 프로젝트다. 같은 프로그램을 두 방식
 
 | 폴더 | 무엇 | 지침 |
 |---|---|---|
-| `desktop_version/` | Tkinter로 만든 맥용 앱. 학습과 가중치 관리도 여기서 한다. | `desktop_version/CLAUDE.md` |
+| `desktop_version/` | Tkinter로 만든 데스크톱 앱. 학습과 가중치 관리도 여기서 한다. | `desktop_version/CLAUDE.md` |
 | `web_version/` | 브라우저에서 도는 정적 페이지. 외부 라이브러리 없음. | `web_version/CLAUDE.md` |
 
 **작업할 폴더의 `CLAUDE.md`를 먼저 읽는다.** 환경 제약과 주의점이 그쪽에 있다.
@@ -16,7 +16,7 @@ MNIST 손글씨 숫자 인식 프로젝트다. 같은 프로그램을 두 방식
 ```
 desktop_version/mnist_cnn.pt
         │
-        │  python3 가중치내보내기.py
+        │  py 가중치내보내기.py
         ▼
 web_version/가중치.bin + 가중치정보.json
 ```
@@ -27,27 +27,29 @@ web_version/가중치.bin + 가중치정보.json
 
 ## 빠른 실행
 
-```bash
-cd desktop_version && python3 app.py                    # 데스크톱
-cd web_version && python3 -m http.server 8000           # 웹 (그 뒤 localhost:8000 접속)
-```
-
-**윈도우에서는 `python3` 를 `py` 로 바꿔 쓴다.** 이 문서의 명령은 전부 맥 기준이다.
-
-| 명령 | 맥 | 윈도우 |
-|---|---|---|
-| `python3` | 정상 | 대개 **마이크로소프트 스토어가 열린다** |
-| `python` | 없음 (요즘 맥은 아예 없다) | 정상 |
-| `py` | 없음 | **정상. 권장** |
+**이 문서의 명령은 전부 윈도우 PowerShell 기준이다.**
 
 ```powershell
-cd desktop_version; py app.py
-cd web_version; py -m http.server 8000
+cd desktop_version; py app.py                    # 데스크톱
+cd web_version; py -m http.server 8000           # 웹 (그 뒤 localhost:8000 접속)
+```
+
+| 명령 | 윈도우 | 맥 |
+|---|---|---|
+| `py` | **정상. 권장** | 없음 |
+| `python` | 정상 | 없음 (요즘 맥은 아예 없다) |
+| `python3` | 대개 **마이크로소프트 스토어가 열린다** | 정상 |
+
+명령을 잇는 기호도 다르다. Windows PowerShell 5.x 는 `&&` 를 모르므로 `;` 로 잇는다. 맥에서는 `py` 를 `python3` 로, `;` 를 `&&` 로 바꿔 쓴다.
+
+```bash
+cd desktop_version && python3 app.py
+cd web_version && python3 -m http.server 8000
 ```
 
 웹 버전은 `index.html` 더블클릭으로 열리지 않는다. HTTP 서버가 필요하다.
 
-**데스크톱 버전은 `torch` 와 `pillow` 가 필요하다**(`pip install torch pillow`). `torch` 는 `pillow` 를 끌고 오지 않는데 `app.py` 가 `PIL` 을 쓰므로 따로 깔아야 한다. 다시 학습까지 하려면 `pip install torch torchvision` 이다(`pillow` 가 딸려 온다). **웹 버전은 필요한 것이 없다.**
+**데스크톱 버전은 `torch` 와 `pillow` 가 필요하다**(`pip install torch pillow`). `torch` 를 설치한다고 `pillow` 가 함께 설치되지는 않는데 `app.py` 가 `PIL` 을 쓰므로 따로 깔아야 한다. 다시 학습까지 하려면 `pip install torch torchvision` 이다(`pillow` 가 딸려 온다). **웹 버전은 필요한 것이 없다.**
 
 ## 공통 규칙
 
@@ -60,9 +62,3 @@ cd web_version; py -m http.server 8000
 
 - `참고자료/스킬-사용-현황과-설치-안내.md` — 이 프로젝트에 쓰인 스킬과 설치 방법
 - `참고자료/Claude CLI vs desktop app differences.md` — CLI 와 데스크톱 앱의 차이
-
-**아래는 저장소에 올리지 않는다** (`.gitignore` 로 제외). 검토 의견서, 인계 메모와 함께 `docs/` 안에 로컬로만 둔다. **`Download ZIP` 으로 받은 폴더에는 없다.**
-
-- `docs/superpowers/specs/2026-08-06-웹-데스크톱-버전-분리-design.md` — 두 버전으로 나눈 설계와 그 과정의 결정 기록
-- `docs/superpowers/plans/2026-08-06-웹-데스크톱-버전-분리.md` — 구현 계획서
-- `CLAUDE_전역.md` — 전역 지침 스냅샷

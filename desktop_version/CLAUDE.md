@@ -2,43 +2,55 @@
 
 # CLAUDE.md — 데스크톱 버전
 
-MNIST 손글씨 숫자 인식의 맥용 데스크톱 버전이다. CNN을 학습하고, Tkinter 그림판에 마우스로 그린 숫자를 인식한다.
+MNIST 손글씨 숫자 인식의 데스크톱 버전이다. CNN을 학습하고, Tkinter 그림판에 마우스로 그린 숫자를 인식한다.
 
 학습과 가중치 관리는 이 폴더가 맡는다. 웹 버전(`../web_version/`)은 여기서 내보낸 가중치를 받아 쓴다.
 
 ## 명령
 
-**이 문서의 명령은 전부 맥 기준이다.** MPS, `손글씨인식.app`, `codesign` 처럼 맥에만 있는 것을 다루기 때문이다. 윈도우에서는 `python3` 를 `py` 로 바꿔 읽고, 실행 방법은 루트의 [README.md](../README.md) 를 본다.
+**이 문서의 명령은 전부 윈도우 PowerShell 기준이다.** 맥에서는 `py` 를 `python3` 로 바꿔 읽고, 맥에만 있는 실행 방법은 아래 「맥에서 실행할 때」 절을 본다.
 
-```bash
+```powershell
 cd desktop_version        # train.py 가 상대 경로를 쓰므로 이 폴더 안에서 실행한다
-python3 train.py          # 학습 후 mnist_cnn.pt 저장 (5회차, MPS 사용, 1분 안팎)
-python3 app.py            # 인식 앱 실행
-python3 가중치내보내기.py     # 웹 버전이 쓸 가중치.bin, 가중치정보.json 생성
-python3 검증데이터만들기.py   # 웹 버전 검증용 정답 데이터 생성
-open 손글씨인식.app         # 앱 번들로 실행 (독에 넣어 쓰는 방식)
+py train.py               # 학습 후 mnist_cnn.pt 저장 (5회차, CPU 사용, 1~2분)
+py app.py                 # 인식 앱 실행
+py 가중치내보내기.py         # 웹 버전이 쓸 가중치.bin, 가중치정보.json 생성
+py 검증데이터만들기.py       # 웹 버전 검증용 정답 데이터 생성
 ```
+
+`py` 대신 `python3` 를 치면 대개 마이크로소프트 스토어가 열린다. 파이썬은 python.org 에서 받아 설치하고, 설치 화면에서 `Add python.exe to PATH` 를 켠다.
 
 **학습 시간은 실측했다** (2026-08-08, MacBook Air M2 16GB, MNIST 데이터가 이미 있는 상태).
 
 | 조건 | 5회차 소요 | 테스트 정확도 |
 |---|---|---|
-| MPS (애플 실리콘 GPU) | **50초** | 98.95% |
-| CPU 만 사용 | **1분 30초** | 99.12% |
+| CPU 만 사용 (윈도우는 항상 이쪽) | **1분 30초** | 99.12% |
+| MPS (애플 실리콘 GPU, 맥) | **50초** | 98.95% |
 
-처음 실행할 때는 MNIST 원본 약 11MB를 내려받는 시간이 더해진다. **"수 분 걸린다"는 앞 판의 서술은 실측과 달라 고쳤다.**
+윈도우 실측치는 아직 없다. `train.py` 의 `장치선택`은 MPS 와 CPU 만 고르므로 윈도우에서는 GPU 가 있어도 CPU 로 학습한다. 처음 실행할 때는 MNIST 원본 약 11MB를 내려받는 시간이 더해진다. **"수 분 걸린다"는 앞 판의 서술은 실측과 달라 고쳤다.**
 
-`train.py`는 데이터 경로를 `root="data"`라는 상대 경로로 쓴다. 그래서 프로젝트 루트에서 `python3 desktop_version/train.py`로 실행하면 데이터를 찾지 못한다. **반드시 이 폴더로 들어가서 실행한다.** 새로 만든 스크립트 둘은 `Path(__file__)` 기준 절대 경로를 쓰므로 어디서 실행해도 된다.
+`train.py`는 데이터 경로를 `root="data"`라는 상대 경로로 쓴다. 그래서 프로젝트 루트에서 `py desktop_version/train.py`로 실행하면 데이터를 찾지 못한다. **반드시 이 폴더로 들어가서 실행한다.** 새로 만든 스크립트 둘은 `Path(__file__)` 기준 절대 경로를 쓰므로 어디서 실행해도 된다.
 
 테스트 프레임워크는 없다. 검증이 필요하면 `preprocess.mnist형식으로변환` + 모델 예측 경로를 직접 호출하는 임시 스크립트를 쓴다. MNIST 테스트 이미지를 280x280으로 키워 앱과 같은 경로로 통과시키면 98% 내외가 나와야 정상이다.
 
 ## 환경 제약 (중요)
 
-이 맥의 제약 때문에 일반적인 구성과 다르다. "고치려" 들기 전에 확인할 것.
+처음 만든 맥의 제약이 구성에 남아 있다. "고치려" 들기 전에 확인할 것.
 
-- **파이썬 3.14뿐이고 TensorFlow는 3.14용 배포판이 없다.** 그래서 Keras가 아니라 PyTorch(2.13)로 구현했다. Keras로 바꾸려면 파이썬 3.12나 3.13을 따로 설치해야 한다.
-- **onnx 패키지도 3.14용 휠이 없다.** free-threaded 빌드(`cp314t`)용만 있는데 이 맥의 파이썬은 GIL이 켜진 일반 빌드다. 그래서 웹 버전은 ONNX 대신 가중치를 직접 내보내는 방식을 쓴다.
-- **MNIST 원본은 저장소에 없다.** 63MB라 `.gitignore`로 제외했다. 저장소를 새로 받았다면 아래 명령으로 먼저 데이터를 채워야 `train.py`와 `검증데이터만들기.py`가 돈다.
+- **만든 맥에는 파이썬 3.14뿐이고 TensorFlow는 3.14용 배포판이 없다.** 그래서 Keras가 아니라 PyTorch(2.13)로 구현했다. Keras로 바꾸려면 파이썬 3.12나 3.13을 따로 설치해야 한다.
+- **onnx 패키지도 3.14용 휠이 없다.** free-threaded 빌드(`cp314t`)용만 있는데 그 맥의 파이썬은 GIL이 켜진 일반 빌드다. 그래서 웹 버전은 ONNX 대신 가중치를 직접 내보내는 방식을 쓴다.
+- **MNIST 원본은 저장소에 없다.** 63MB라 `.gitignore`로 제외했다. `train.py`와 `검증데이터만들기.py`를 처음 돌리면 `download=True`가 자동으로 내려받는다.
+- **자동 내려받기가 `CERTIFICATE_VERIFY_FAILED` 로 실패하면** 아래 명령으로 `.gz` 4개를 직접 받는다. 압축을 푸는 것은 torchvision 이 알아서 한다. `download=True`는 파일이 이미 있으면 건너뛰므로 코드를 고칠 필요가 없다.
+
+  ```powershell
+  mkdir desktop_version\data\MNIST\raw -Force
+  cd desktop_version\data\MNIST\raw
+  foreach ($name in "train-images-idx3-ubyte","train-labels-idx1-ubyte","t10k-images-idx3-ubyte","t10k-labels-idx1-ubyte") {
+    curl.exe -O "https://ossci-datasets.s3.amazonaws.com/mnist/$name.gz"
+  }
+  ```
+
+  맥에서는 이 오류가 늘 났다. 근본 해결은 `/Applications/Python 3.14/Install Certificates.command` 실행(관리자 권한 필요)이고, 명령은 아래와 같다.
 
   ```bash
   mkdir -p desktop_version/data/MNIST/raw
@@ -48,10 +60,7 @@ open 손글씨인식.app         # 앱 번들로 실행 (독에 넣어 쓰는 �
   done
   ```
 
-  `.gz` 4개만 받으면 된다. 압축을 푸는 것은 torchvision 이 알아서 한다.
-
-- **MNIST 자동 내려받기는 SSL 인증서 오류로 실패한다.** (`CERTIFICATE_VERIFY_FAILED`) 그래서 위처럼 `curl`로 직접 받는다. `download=True`는 파일이 이미 있으면 건너뛰므로, 받아 두기만 하면 코드를 고칠 필요가 없다. 근본 해결은 `/Applications/Python 3.14/Install Certificates.command` 실행(관리자 권한 필요).
-- 학습은 애플 실리콘 GPU(MPS)를 쓴다. 예측은 CPU로 한다.
+- 학습은 윈도우에서 CPU, 맥에서 애플 실리콘 GPU(MPS)를 쓴다. 예측은 어디서나 CPU로 한다.
 
 ## 구조
 
@@ -107,7 +116,15 @@ open 손글씨인식.app         # 앱 번들로 실행 (독에 넣어 쓰는 �
 - `붓굵기 = 18`은 280px 캔버스를 28px로 줄였을 때 MNIST 획 굵기와 비슷해지도록 맞춘 값이다.
 - `모델파일`은 `Path(__file__).parent` 기준으로 찾는다. 파인더 더블클릭이나 앱 번들 실행에서는 현재 폴더가 달라지기 때문이다.
 
-## 맥 실행 방식 두 가지
+## 윈도우 실행 방식 두 가지
+
+**PowerShell 에서 `py app.py`** — 기본 방법이다.
+
+**`app.py` 더블클릭** — python.org 설치판은 `.py` 파일을 Python Launcher(`py.exe`)에 연결해 두므로 탐색기에서 더블클릭해도 실행된다. 창이 바로 닫히면 오류가 난 것이므로 PowerShell 에서 다시 실행해 메시지를 본다.
+
+## 맥에서 실행할 때
+
+`py` 를 `python3` 로 바꿔 읽는다. 맥에는 실행 방법이 하나 더 있다.
 
 **`손글씨인식.app` 번들** — `Contents/MacOS/Python`은 프레임워크 파이썬 실행 파일의 **복사본**이다. 번들 안에서 실행되어야 독이 "Python"이 아니라 이 앱의 이름과 아이콘을 보여 준다. `launcher` 스크립트가 자기 위치에서 세 단계 위를 프로젝트 폴더로 삼으므로, **`.app`은 `app.py`와 같은 폴더에 있어야 한다.** 즉 이 폴더 안에 있어야 한다. 번들 내용을 수정했다면 다시 서명한다.
 
