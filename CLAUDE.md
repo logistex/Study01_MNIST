@@ -60,5 +60,5 @@ cd web_version && python3 -m http.server 8000
 
 ## 문서
 
-- `참고자료/스킬-사용-현황과-설치-안내.md` — 이 프로젝트에 쓰인 스킬과 설치 방법
-- `참고자료/Claude CLI vs desktop app differences.md` — CLI 와 데스크톱 앱의 차이
+- [`참고자료/스킬-사용-현황과-설치-안내.md`](참고자료/스킬-사용-현황과-설치-안내.md) — 이 프로젝트에 쓰인 스킬과 설치 방법
+- [`참고자료/Claude CLI vs desktop app differences.md`](참고자료/Claude%20CLI%20vs%20desktop%20app%20differences.md) — CLI 와 데스크톱 앱의 차이
