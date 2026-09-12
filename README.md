@@ -8,7 +8,7 @@
 
 - **데스크톱** — `cd desktop_version; py app.py`
 - **웹** — `cd web_version; py -m http.server 8000` 을 실행한 뒤 http://localhost:8000 접속
-- **배포본** — https://logistex.github.io/Study01_MNIST_mac/
+- **배포본** — https://logistex.github.io/Study01_MNIST/
 
 학습된 가중치(`desktop_version/mnist_cnn.pt`)가 들어 있으므로 **학습 없이 바로 실행된다.**
 

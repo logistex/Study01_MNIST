@@ -30,7 +30,7 @@ open http://localhost:8000/
 
 저장소 설정에서 `Settings` → `Pages` → `Source`가 `GitHub Actions`여야 동작한다.
 
-주소는 `https://logistex.github.io/Study01_MNIST_mac/` 이다.
+주소는 `https://logistex.github.io/Study01_MNIST/` 이다.
 
 **`검증데이터.json`은 배포본에 없다.** git 추적 대상이 아니라서다. 그래서 배포된 `검증.html`은 404 안내를 표시한다. 검증은 로컬에서 하고, 배포본에서 확인할 것은 `index.html`이다.
 
@@ -59,7 +59,7 @@ Please cancel <막고 있는 SHA> first or wait for it to complete.
 막고 있는 배포는 이렇게 취소한다.
 
 ```bash
-gh api -X POST "repos/logistex/Study01_MNIST_mac/pages/deployments/<막고 있는 SHA>/cancel"
+gh api -X POST "repos/logistex/Study01_MNIST/pages/deployments/<막고 있는 SHA>/cancel"
 ```
 
 ### 배포본이 최신인지 확인하는 법
@@ -67,7 +67,7 @@ gh api -X POST "repos/logistex/Study01_MNIST_mac/pages/deployments/<막고 있�
 워크플로 실행 기록과 Pages 배포 상태를 믿지 말고 **배포본을 직접 받아 로컬과 대조한다.** 이 폴더에서 실행한다.
 
 ```bash
-curl -s https://logistex.github.io/Study01_MNIST_mac/CLAUDE.md | diff - CLAUDE.md
+curl -s https://logistex.github.io/Study01_MNIST/CLAUDE.md | diff - CLAUDE.md
 ```
 
 이 대조가 왜 필요한지는 2026-08-06 의 일이 말해 준다. 그날 Pages 배포 8건이 **전부** `failure` 또는 `error` 였는데 사이트는 HTTP 200 으로 정상 동작했다. 확인해 보니 첫 커밋 `b5018a6` 의 내용이 서비스되고 있었고, **그 뒤 세 커밋은 하나도 반영되지 않았다.** 그 사이 바뀐 것이 문서뿐이라 앱 동작에는 차이가 없었고, 그래서 더 눈에 띄지 않았다.
